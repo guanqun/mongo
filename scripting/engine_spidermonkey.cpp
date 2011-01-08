@@ -561,7 +561,7 @@ namespace mongo {
         }
 
         jsval toval( long long n ) {
-            JSObject * o = JS_NewObject( _context , &numberlong_class , 0 , 0 );
+            JSObject * o = JS_NewObject( _context , numberlong_clasp , 0 , 0 );
             makeLongObj( n, o );
             return OBJECT_TO_JSVAL( o );
         }

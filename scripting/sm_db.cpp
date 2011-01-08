@@ -858,19 +858,49 @@ namespace mongo {
         return JS_TRUE;
     }
 
+    extern JSClass *numberlong_clasp;
 
-    JSClass numberlong_class = {
-        "NumberLong" , JSCLASS_HAS_PRIVATE ,
-        JS_PropertyStub, JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
-        JS_EnumerateStub, JS_ResolveStub , JS_ConvertStub, JS_FinalizeStub,
-        JSCLASS_NO_OPTIONAL_MEMBERS
+    JSBool numberlong_equality( JSContext *cx, JSObject *obj, jsval v, JSBool *bp ) {
+        if ( ! JSVAL_IS_OBJECT( v ) || JSVAL_IS_NULL( v ) ) {
+            *bp = JS_FALSE;
+            return JS_TRUE;
+        }
+
+        Convertor c( cx );
+
+        JSObject *other = JSVAL_TO_OBJECT( v );
+
+        if ( JS_InstanceOf( cx, obj, numberlong_clasp, 0 ) &&
+             JS_InstanceOf( cx, other, numberlong_clasp, 0 ) &&
+             c.toNumberLongUnsafe( obj ) == c.toNumberLongUnsafe( other ) ) {
+            *bp  = JS_TRUE;
+        }
+        else {
+            *bp = JS_FALSE;
+        }
+
+        return JS_TRUE;
+    }
+
+    JSExtendedClass numberlong_extendedclass = {
+        // base
+        {
+            "NumberLong" , JSCLASS_HAS_PRIVATE | JSCLASS_IS_EXTENDED,
+            JS_PropertyStub, JS_PropertyStub, JS_PropertyStub, JS_PropertyStub,
+            JS_EnumerateStub, JS_ResolveStub , JS_ConvertStub, JS_FinalizeStub,
+            JSCLASS_NO_OPTIONAL_MEMBERS
+        },
+        numberlong_equality,
+        0, 0, 0, 0
     };
+
+    JSClass *numberlong_clasp = &numberlong_extendedclass.base;
 
     JSBool numberlong_constructor( JSContext *cx, JSObject *obj, uintN argc, jsval *argv, jsval *rval ) {
         smuassert( cx , "NumberLong needs 0 or 1 args" , argc == 0 || argc == 1 );
 
-        if ( ! JS_InstanceOf( cx , obj , &numberlong_class , 0 ) ) {
-            obj = JS_NewObject( cx , &numberlong_class , 0 , 0 );
+        if ( ! JS_InstanceOf( cx , obj , numberlong_clasp , 0 ) ) {
+            obj = JS_NewObject( cx , numberlong_clasp , 0 , 0 );
             CHECKNEWOBJECT( obj, cx, "numberlong_constructor" );
             *rval = OBJECT_TO_JSVAL( obj );
         }
@@ -1030,7 +1060,7 @@ namespace mongo {
         assert( JS_InitClass( cx , global , 0 , &uuid_class , uuid_constructor , 0 , 0 , uuid_functions , 0 , 0 ) );
 
         assert( JS_InitClass( cx , global , 0 , &timestamp_class , timestamp_constructor , 0 , 0 , 0 , 0 , 0 ) );
-        assert( JS_InitClass( cx , global , 0 , &numberlong_class , numberlong_constructor , 0 , 0 , numberlong_functions , 0 , 0 ) );
+        assert( JS_InitClass( cx , global , 0 , numberlong_clasp , numberlong_constructor , 0 , 0 , numberlong_functions , 0 , 0 ) );
         assert( JS_InitClass( cx , global , 0 , &minkey_class , 0 , 0 , 0 , 0 , 0 , 0 ) );
         assert( JS_InitClass( cx , global , 0 , &maxkey_class , 0 , 0 , 0 , 0 , 0 , 0 ) );
 
@@ -1070,7 +1100,7 @@ namespace mongo {
             return true;
         }
 
-        if ( JS_InstanceOf( c->_context , o , &numberlong_class , 0 ) ) {
+        if ( JS_InstanceOf( c->_context , o , numberlong_clasp , 0 ) ) {
             b.append( name , c->toNumberLongUnsafe( o ) );
             return true;
         }

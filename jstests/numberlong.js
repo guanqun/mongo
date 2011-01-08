@@ -53,3 +53,8 @@ assert.eq.automsg( "'{ \"a\" : NumberLong(\"-11111111111111111\") }'", "p" );
 assert.throws.automsg( function() { new NumberLong( "" ); } );
 assert.throws.automsg( function() { new NumberLong( "y" ); } );
 assert.throws.automsg( function() { new NumberLong( "11111111111111111111" ); } );
+
+// SERVER-1672
+assert.eq.automsg( new NumberLong(3754), new NumberLong(3754) );
+assert.neq( new NumberLong(3754), new NumberLong(1234), "numberlong A" );
+assert.neq( new NumberLong(3754), null "numberlong B" );
