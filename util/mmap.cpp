@@ -178,8 +178,7 @@ namespace mongo {
         ptf = this;
     }
 
-#if defined(_DEBUG) && !defined(_TESTINTENT)
-
+#if defined(_DEBUG)
     void MongoFile::markAllWritable() {
         rwlock lk( mmmutex , false );
         for ( set<MongoFile*>::iterator i = mmfiles.begin(); i != mmfiles.end(); i++ ) {
@@ -196,5 +195,4 @@ namespace mongo {
         }
     }
 #endif
-
 } // namespace mongo

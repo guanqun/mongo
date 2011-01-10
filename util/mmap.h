@@ -55,9 +55,13 @@ namespace mongo {
         static long long totalMappedLength();
         static void closeAllFiles( stringstream &message );
 
-        // Locking allows writes. Reads are always allowed
+#if defined(_DEBUG)
         static void markAllWritable();
         static void unmarkAllWritable();
+#else
+        static void markAllWritable() { }
+        static void unmarkAllWritable() { }
+#endif
 
         static bool exists(boost::filesystem::path p) { return boost::filesystem::exists(p); }
 
@@ -92,12 +96,6 @@ namespace mongo {
         static map<string,MongoFile*> pathToFile;
         static RWLock mmmutex;
     };
-
-#if !defined(_DEBUG) || defined(_TESTINTENT)
-    // no-ops in production
-    inline void MongoFile::markAllWritable() {}
-    inline void MongoFile::unmarkAllWritable() {}
-#endif
 
     /** look up a MMF by filename. scoped mutex locking convention.
         example:

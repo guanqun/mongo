@@ -21,6 +21,7 @@
 #include "../bson/util/atomic_int.h"
 #include "../util/concurrency/mvar.h"
 #include "../util/concurrency/thread_pool.h"
+#include "../util/timer.h"
 #include <boost/thread.hpp>
 #include <boost/bind.hpp>
 
@@ -58,8 +59,20 @@ namespace ThreadedTests {
     };
 
     class MongoMutexTest : public ThreadedTest<135> {
-        enum { N = 80000 };
+#if defined(_DEBUG)
+        enum { N = 5000 };
+#else
+        enum { N = 40000 };
+#endif
         MongoMutex *mm;
+    public:
+        void run() {
+            Timer t;
+            cout << "MongoMutexTest N:" << N << endl;
+            ThreadedTest<135>::run();
+            cout << "MongoMutexTest " << t.millis() << "ms" << endl;
+        }
+    private:
         virtual void setup() {
             mm = new MongoMutex("MongoMutexTest");
         }
