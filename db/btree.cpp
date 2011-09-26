@@ -390,8 +390,7 @@ namespace mongo {
             // 1 4 9
             // ->
             // 1 4 _ 9
-            for ( int j = this->n; j > keypos; j-- ) // make room
-                b->k(j) = b->k(j-1);
+            memmove((char*)b+sizeof(_KeyNode), b, (this->n-keypos)*sizeof(_KeyNode));
         }
 
         getDur().declareWriteIntent(&b->emptySize, sizeof(this->emptySize)+sizeof(this->topSize)+sizeof(this->n));
